@@ -7,29 +7,34 @@ import com.statementstrategy.DeleteAllStrategy;
 import com.statementstrategy.StatementStrategy;
 import com.domain.User;
 
+import javax.sql.DataSource;
 import java.sql.*;
 
 public class UserDao {
 
-    private ConnectionMaker connectionMaker;
+//    private ConnectionMaker connectionMaker;
+
+    private final DataSource dataSource;
+
+    public UserDao(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     private Connection c;
     private PreparedStatement ps;
 
-    public UserDao(ConnectionMaker connectionMaker) {
-        this.connectionMaker = connectionMaker;
-    }
+//    public UserDao(ConnectionMaker connectionMaker) {
+//        this.connectionMaker = connectionMaker;
+//    }
 
     public void jdbcContextStatementStrategy(StatementStrategy stmst){
         c = null;
         ps = null;
         try {
-            c = connectionMaker.makeConnection();
+            c = dataSource.getConnection();
             ps = stmst.getStatement(c);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
             if (ps != null) {
@@ -55,7 +60,8 @@ public class UserDao {
     }
 
     public User findById(String id) throws ClassNotFoundException, SQLException {
-        c = connectionMaker.makeConnection();
+        c = dataSource.getConnection();
+//        c = connectionMaker.makeConnection();
 
         ps = c.prepareStatement("SELECT * FROM users WHERE id = ?");
         ps.setString(1, id);
@@ -82,14 +88,13 @@ public class UserDao {
         ps = null;
         ResultSet rs = null;
         try {
-            c = connectionMaker.makeConnection();
+            c = dataSource.getConnection();
+//            c = connectionMaker.makeConnection();
             ps = c.prepareStatement("SELECT count(*) FROM users");
             rs = ps.executeQuery();
             rs.next();
             return rs.getInt(1);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
             if (rs != null) {
@@ -114,11 +119,11 @@ public class UserDao {
 //        return count;
     }
 
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        UserDao userDao = new UserDao(new AwsConnectionMaker());
-        User user = new User("id", "name", "password");
-        userDao.add(user);
-        user = userDao.findById("id");
-        System.out.println(user.getName());
-    }
+//    public static void main(String[] args) throws SQLException, ClassNotFoundException {
+//        UserDao userDao = new UserDao(new AwsConnectionMaker());
+//        User user = new User("id", "name", "password");
+//        userDao.add(user);
+//        user = userDao.findById("id");
+//        System.out.println(user.getName());
+//    }
 }
