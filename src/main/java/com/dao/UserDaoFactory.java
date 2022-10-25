@@ -1,5 +1,6 @@
 package com.dao;
 
+import com.connectionmaker.AwsConnectionMaker;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

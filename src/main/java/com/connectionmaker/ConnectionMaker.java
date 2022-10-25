@@ -1,4 +1,4 @@
-package com.dao;
+package com.connectionmaker;
 
 import java.sql.Connection;
 import java.sql.SQLException;

@@ -1,10 +1,13 @@
 package com.dao;
 
+import com.connectionmaker.AwsConnectionMaker;
+import com.connectionmaker.ConnectionMaker;
+import com.statementstrategy.AddStrategy;
+import com.statementstrategy.DeleteAllStrategy;
+import com.statementstrategy.StatementStrategy;
 import com.domain.User;
-import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.sql.*;
-import java.util.Map;
 
 public class UserDao {
 
@@ -17,14 +20,12 @@ public class UserDao {
         this.connectionMaker = connectionMaker;
     }
 
-    public void deleteAll() throws SQLException, ClassNotFoundException {
-//        c = connectionMaker.makeConnection();
-//        ps = c.prepareStatement("delete from users");
+    public void jdbcContextStatementStrategy(StatementStrategy stmst){
         c = null;
         ps = null;
         try {
             c = connectionMaker.makeConnection();
-            ps = c.prepareStatement("delete from users");
+            ps = stmst.getStatement(c);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -44,22 +45,13 @@ public class UserDao {
                 }
             }
         }
-
+    }
+    public void deleteAll() throws SQLException, ClassNotFoundException {
+        jdbcContextStatementStrategy(new DeleteAllStrategy());
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
-        c = connectionMaker.makeConnection();
-        ps = c.prepareStatement("INSERT INTO users(id, name, password) VALUES (?, ?, ?)");
-        ps.setString(1, user.getId());
-        ps.setString(2, user.getName());
-        ps.setString(3, user.getPassword());
-
-        if(user == null) throw new EmptyResultDataAccessException(1);
-
-        ps.executeUpdate();
-
-        ps.close();
-        c.close();
+        jdbcContextStatementStrategy(new AddStrategy(user));
     }
 
     public User findById(String id) throws ClassNotFoundException, SQLException {
