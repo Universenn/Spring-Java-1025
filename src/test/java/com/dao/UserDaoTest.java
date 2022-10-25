@@ -16,7 +16,9 @@ import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// 스프링의 테스트 컨텍스트 프레임워크의 JUnit 확장기능 지정
 @ExtendWith(SpringExtension.class)
+// 테스트 컨텍스트가 자동으로 만들어줄 애플리케이션 컨텍스트의 위치 고정
 @ContextConfiguration(classes = UserDaoFactory.class)
 class UserDaoTest {
 
@@ -25,16 +27,18 @@ class UserDaoTest {
     User user2;
     User user3;
     @Autowired
-    ApplicationContext context;
+    // 테스트 오브젝트가 만들어지고 나면 스프링 테스트 컨텍스트에 의해 자동으로 값이 주입된다
+    private ApplicationContext context;
+
 //    UserDao dao = context.getBean("awsUserDao", UserDao.class);
     @BeforeEach
     @DisplayName("테스트 시작")
     void setUp(){
         // Spring 도입
         userDao = context.getBean("awsUserDao", UserDao.class);
-        user1 = new User("1","11","111");
-        user2 = new User("2","22","222");
-        user3 = new User("3","33","333");
+        this.user1 = new User("1","11","111");
+        this.user2 = new User("2","22","222");
+        this.user3 = new User("3","33","333");
     }
     @Test
     void addAndGet() throws SQLException, ClassNotFoundException {

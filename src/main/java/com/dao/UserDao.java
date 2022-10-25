@@ -1,6 +1,7 @@
 package com.dao;
 
 import com.domain.User;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.sql.*;
 import java.util.Map;
@@ -27,13 +28,14 @@ public class UserDao {
         c.close();
     }
 
-    public void add(final User user) throws ClassNotFoundException, SQLException {
+    public void add(User user) throws ClassNotFoundException, SQLException {
         c = connectionMaker.makeConnection();
-
         ps = c.prepareStatement("INSERT INTO users(id, name, password) VALUES (?, ?, ?)");
         ps.setString(1, user.getId());
         ps.setString(2, user.getName());
         ps.setString(3, user.getPassword());
+
+        if(user == null) throw new EmptyResultDataAccessException(1);
 
         ps.executeUpdate();
 
@@ -51,7 +53,10 @@ public class UserDao {
 
         User user = null;
         if (rs.next()) {
-            user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
+            user = new User(
+                    rs.getString("id"),
+                    rs.getString("name"),
+                    rs.getString("password"));
         }
 
         rs.close();
