@@ -42,10 +42,28 @@ class UserDaoTest {
 //        userDao = new UserDao(new AwsConnectionMaker());
 //        UserDaoFactory 불러오기
 //        userDao = new UserDaoFactory().awsUserDao();
-
-//        userDao.add(user);
+        userDao.deleteAll();
+        userDao.add(user1);
 
         User findId = userDao.findById(user1.getId());
         assertEquals(user1.getName(),findId.getName());
+    }
+    @Test
+    void delete() throws SQLException, ClassNotFoundException {
+        userDao.deleteAll();
+        userDao.add(user1);
+        userDao.add(user2);
+        userDao.add(user3);
+        User findId = userDao.findById(user1.getId());
+        assertEquals(user1.getName(),findId.getName());
+    }
+    @Test
+    void count() throws SQLException, ClassNotFoundException {
+        userDao.deleteAll();
+        assertEquals(userDao.getCount(),0);
+        userDao.add(user1);
+        userDao.add(user2);
+        userDao.add(user3);
+        assertEquals(userDao.getCount(),3);
     }
 }
