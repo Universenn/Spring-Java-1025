@@ -52,11 +52,27 @@ public class UserDao {
         }
     }
     public void deleteAll() throws SQLException, ClassNotFoundException {
-        jdbcContextStatementStrategy(new DeleteAllStrategy());
+//        jdbcContextStatementStrategy(new DeleteAllStrategy());
+        jdbcContextStatementStrategy(new StatementStrategy() {
+            @Override
+            public PreparedStatement getStatement(Connection c) throws SQLException {
+                return c.prepareStatement("delete from users");
+            }
+        });
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
-        jdbcContextStatementStrategy(new AddStrategy(user));
+//        jdbcContextStatementStrategy(new AddStrategy(user));
+        jdbcContextStatementStrategy(new StatementStrategy() {
+            @Override
+            public PreparedStatement getStatement(Connection c) throws SQLException {
+                PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) VALUES (?, ?, ?)");
+                ps.setString(1, user.getId());
+                ps.setString(2, user.getName());
+                ps.setString(3, user.getPassword());
+                return ps;
+            }
+        });
     }
 
     public User findById(String id) throws ClassNotFoundException, SQLException {
