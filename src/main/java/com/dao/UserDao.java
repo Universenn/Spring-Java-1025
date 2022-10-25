@@ -7,54 +7,53 @@ import java.util.Map;
 
 public class UserDao {
 
-    ConnectionMaker connectionMaker;
-
-    public void add(User user) throws SQLException {
+    public void add(final User user) throws ClassNotFoundException, SQLException {
         Map<String, String> env = System.getenv();
-        Connection c = DriverManager.getConnection(env.get("DB_HOST"),
-                env.get("DB_USER"), env.get("DB_PASSWORD"));
 
-        // Query문 작성
-        PreparedStatement pstmt = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?,?,?);");
-        pstmt.setString(1, user.getId());
-        pstmt.setString(2, user.getName());
-        pstmt.setString(3, user.getPassword());
+        Class.forName("com.mysql.cj.jdbc.Driver");
 
-        // Query문 실행
-        pstmt.executeUpdate();
+        Connection c = DriverManager.getConnection(env.get("DB_HOST"), env.get("DB_USER"), env.get("DB_PASSWORD"));
 
-        pstmt.close();
+        PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) VALUES (?, ?, ?)");
+        ps.setString(1, user.getId());
+        ps.setString(2, user.getName());
+        ps.setString(3, user.getPassword());
+
+        ps.executeUpdate();
+
+        ps.close();
         c.close();
     }
 
-    public User findById(String id) throws SQLException {
+    public User findById(String id) throws ClassNotFoundException, SQLException {
         Map<String, String> env = System.getenv();
-        Connection c;
-        // DB접속 (ex sql workbeanch실행)
-        c = DriverManager.getConnection(env.get("DB_HOST"),
-                env.get("DB_USER"), env.get("DB_PASSWORD"));
 
-        // Query문 작성
-        PreparedStatement pstmt = c.prepareStatement("SELECT * FROM users WHERE id = ?");
-        pstmt.setString(1, id);
+        Class.forName("com.mysql.cj.jdbc.Driver");
 
-        // Query문 실행
-        ResultSet rs = pstmt.executeQuery();
-        rs.next();
-        User user = new User(rs.getString("id"), rs.getString("name"),
-                rs.getString("password"));
+        Connection c = DriverManager.getConnection(env.get("DB_HOST"), env.get("DB_USER"), env.get("DB_PASSWORD"));
+
+        PreparedStatement ps = c.prepareStatement(
+                "SELECT * FROM users WHERE id = ?");
+        ps.setString(1, id);
+
+        ResultSet rs = ps.executeQuery();
+
+        User user = null;
+        if (rs.next()) {
+            user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
+        }
 
         rs.close();
-        pstmt.close();
+        ps.close();
         c.close();
+
         return user;
-
     }
-
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
         UserDao userDao = new UserDao();
-//        userDao.add();
-        User user = userDao.findById("6");
+        User user = new User("id", "name", "password");
+        userDao.add(user);
+        user = userDao.findById("id");
         System.out.println(user.getName());
     }
 }
