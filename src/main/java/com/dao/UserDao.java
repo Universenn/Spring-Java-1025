@@ -18,14 +18,33 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException, ClassNotFoundException {
-        c = connectionMaker.makeConnection();
+//        c = connectionMaker.makeConnection();
+//        ps = c.prepareStatement("delete from users");
+        c = null;
+        ps = null;
+        try {
+            c = connectionMaker.makeConnection();
+            ps = c.prepareStatement("delete from users");
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (Exception e) {
+                }
+            }
+            if (c != null) {
+                try {
+                    ps.close();
+                } catch (Exception e) {
+                }
+            }
+        }
 
-        ps = c.prepareStatement("delete from users");
-
-        ps.executeUpdate();
-
-        ps.close();
-        c.close();
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
@@ -67,17 +86,40 @@ public class UserDao {
     }
 
     public int getCount() throws SQLException, ClassNotFoundException {
-        c = connectionMaker.makeConnection();
-        ps = c.prepareStatement("SELECT count(*) FROM users");
-        ResultSet rs = ps.executeQuery();
-        rs.next();
-        int count = rs.getInt(1);
-
-        rs.close();
-        ps.close();
-        c.close();
-
-        return count;
+        c = null;
+        ps = null;
+        ResultSet rs = null;
+        try {
+            c = connectionMaker.makeConnection();
+            ps = c.prepareStatement("SELECT count(*) FROM users");
+            rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (Exception e) {
+                }
+            }
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (Exception e) {
+                }
+            }
+            if (c != null) {
+                try {
+                    ps.close();
+                } catch (Exception e) {
+                }
+            }
+        }
+//        return count;
     }
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
